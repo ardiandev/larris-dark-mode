@@ -136,7 +136,8 @@ function larris_dark_mode_inline_styles() {
 	wp_add_inline_style( 'larris-dark-mode-dynamic', $custom_css );
 }
         
-        add_action( 'wp_enqueue_scripts', 'larris_dark_mode_inline_styles' );
+        
+                    add_action( 'wp_enqueue_scripts', 'larris_dark_mode_inline_styles' );
 
 
 
