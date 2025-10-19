@@ -1,0 +1,32 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+    needs: lint  # ensure lint job passes first
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.8.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Sync files to server
+        run: |
+          rsync -avz --delete \
+            --exclude=".github/" \
+            --exclude="node_modules/" \
+            ./ username@yourserver.com:/path/to/wordpress/wp-content/plugins/larris-dark-mode
+
+      - name: Clear cache (optional)
+        run: ssh username@yourserver.com "wp cache flush"
+
