@@ -1,0 +1,92 @@
+/*!********************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/larris-dark-mode/style.scss ***!
+  \********************************************************************************************************************************************************************************************************************************************************/
+/**
+ * Shared styles for front-end and editor
+ */
+/* =============================
+   COLOR VARIABLES
+============================= */
+:root {
+  --dark: #142850; /* text / border dark color */
+  --light: #dae1e7; /* background light color */
+}
+html[data-theme=dark] {
+  --dark: #dae1e7; /* text / border light color */
+  --light: #142850; /* background dark color */
+}
+/* =============================
+   GLOBAL ELEMENTS
+============================= */
+body,
+a,
+.post-container,
+.header-separator {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+body {
+  background-color: var(--light);
+  color: var(--dark);
+}
+a {
+  color: var(--dark);
+  text-decoration: none;
+}
+.post-container,
+.header-separator {
+  border: 1px solid var(--dark);
+}
+/* =============================
+   THEME SWITCHER TOGGLE
+============================= */
+.theme-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+}
+/* Switch container */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+/* Hide checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+/* Slider track */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  background-color: #ccc;
+  border-radius: 24px;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  transition: 0.4s;
+}
+/* The slider knob */
+.slider::before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  right: 2px;
+  bottom: 2px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.4s;
+}
+/* Move knob when checked */
+input:checked + .slider::before {
+  transform: translateX(-26px);
+}
+/* Optional: change background when checked */
+input:checked + .slider {
+  background-color: #666;
+}
