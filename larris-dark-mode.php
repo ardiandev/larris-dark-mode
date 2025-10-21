@@ -56,6 +56,13 @@ function create_block_larris_dark_block_init() {
 		register_block_type( __DIR__ . "/build/{$block_type}" );
 	}
 }
+
+// Include admin settings page.
+if ( is_admin() ) {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/admin-settings.php';
+}
+
+
 add_action( 'init', 'create_block_larris_dark_block_init' );
 
 /**
@@ -79,21 +86,31 @@ function larris_dark_mode_inline_theme_script() {
 }
 add_action( 'wp_head', 'larris_dark_mode_inline_theme_script', 1 );
 
+
+
 /**
  * Output custom colors as CSS variables for both themes.
  */
 function larris_dark_mode_inline_styles() {
 	// Light theme colors.
-	$light_bg    = get_option( 'larris_dark_mode_light_bg', '#dae1e7' );
-	$light_txt   = get_option( 'larris_dark_mode_light_text', '#142850' );
-	$light_link  = get_option( 'larris_dark_mode_light_link', '#1e73be' );
-	$light_hover = get_option( 'larris_dark_mode_light_hover', '#125688' );
+	$light_bg            = get_option( 'larris_dark_mode_light_bg', '#dae1e7' );
+	$light_txt           = get_option( 'larris_dark_mode_light_text', '#142850' );
+	$light_link          = get_option( 'larris_dark_mode_light_link', '#1e73be' );
+	$light_hover         = get_option( 'larris_dark_mode_light_hover', '#125688' );
+	$light_btn_bg        = get_option( 'larris_dark_mode_light_btn_bg', '#A6B1E1' );
+	$light_btn_txt       = get_option( 'larris_dark_mode_light_btn_text', '#ffffff' );
+	$light_btn_bg_hover  = get_option( 'larris_dark_mode_light_btn_bg_hover', '#8c95d8' );
+	$light_btn_txt_hover = get_option( 'larris_dark_mode_light_btn_text_hover', '#ffffff' );
 
 	// Dark theme colors.
-	$dark_bg    = get_option( 'larris_dark_mode_dark_bg', '#142850' );
-	$dark_txt   = get_option( 'larris_dark_mode_dark_text', '#dae1e7' );
-	$dark_link  = get_option( 'larris_dark_mode_dark_link', '#4da8da' );
-	$dark_hover = get_option( 'larris_dark_mode_dark_hover', '#90e0ef' );
+	$dark_bg            = get_option( 'larris_dark_mode_dark_bg', '#142850' );
+	$dark_txt           = get_option( 'larris_dark_mode_dark_text', '#dae1e7' );
+	$dark_link          = get_option( 'larris_dark_mode_dark_link', '#4da8da' );
+	$dark_hover         = get_option( 'larris_dark_mode_dark_hover', '#90e0ef' );
+	$dark_btn_bg        = get_option( 'larris_dark_mode_dark_btn_bg', '#424874' );
+	$dark_btn_txt       = get_option( 'larris_dark_mode_dark_btn_text', '#F4EEFF' );
+	$dark_btn_bg_hover  = get_option( 'larris_dark_mode_dark_btn_bg_hover', '#5c5f8e' );
+	$dark_btn_txt_hover = get_option( 'larris_dark_mode_dark_btn_text_hover', '#ffffff' );
 
 	// Dynamic CSS output.
 	$custom_css = "
@@ -102,12 +119,21 @@ function larris_dark_mode_inline_styles() {
 			--light-text: {$light_txt};
 			--light-link: {$light_link};
 			--light-hover: {$light_hover};
+			--btn-bg: {$light_btn_bg};
+			--btn-text: {$light_btn_txt};
+			--btn-bg-hover: {$light_btn_bg_hover };
+			--btn-text-hover: {$light_btn_txt_hover};
 		}
+
 		html[data-theme='dark'] {
 			--light-bg: {$dark_bg};
 			--light-text: {$dark_txt};
 			--light-link: {$dark_link};
 			--light-hover: {$dark_hover};
+			--btn-bg: {$dark_btn_bg};
+			--btn-text: {$dark_btn_txt};
+			--btn-bg-hover: {$dark_btn_bg_hover};
+			--btn-text-hover: {$dark_btn_txt_hover};
 		}
 
 		body {
@@ -126,6 +152,27 @@ function larris_dark_mode_inline_styles() {
 		a:focus {
 			color: var(--light-hover);
 		}
+
+        .wp-block-button__link.has-custom-font-size.wp-element-button {
+	        display: inline-block;
+	        background-color: var(--btn-bg);
+	        color: var(--btn-text);
+	        text-decoration: none;
+	        transition:
+		        background-color 0.35s ease-in-out,
+		        color 0.35s ease-in-out,
+		        box-shadow 0.35s ease-in-out;
+	        will-change: background-color, color, box-shadow;
+        }
+
+        .wp-block-button__link.wp-element-button:hover,
+        .wp-block-button__link.has-custom-font-size.wp-element-button:hover {
+	        background-color: var(--btn-bg-hover);
+	        color: var(--btn-text-hover);
+	        box-shadow: 0 0 12px rgba(0, 0, 0, 0.15);
+        }
+
+
 	";
 
 	// Cache-busting version.
@@ -135,19 +182,12 @@ function larris_dark_mode_inline_styles() {
 	wp_enqueue_style( 'larris-dark-mode-dynamic' );
 	wp_add_inline_style( 'larris-dark-mode-dynamic', $custom_css );
 }
+add_action( 'wp_enqueue_scripts', 'larris_dark_mode_inline_styles' );
 
 
 
 
 
-															add_action( 'wp_enqueue_scripts', 'larris_dark_mode_inline_styles' );
-
-
-
-// Include admin settings page.
-if ( is_admin() ) {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/admin-settings.php';
-}
 
 
 

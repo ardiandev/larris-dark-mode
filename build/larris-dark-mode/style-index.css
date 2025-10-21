@@ -24,10 +24,6 @@ a,
 .header-separator {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
-body {
-  background-color: var(--light);
-  color: var(--dark);
-}
 a {
   color: var(--dark);
   text-decoration: none;

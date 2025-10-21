@@ -25,10 +25,7 @@ a,
 	transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
-body {
-	background-color: var(--light);
-	color: var(--dark);
-}
+
 
 a {
 	color: var(--dark);
@@ -86,7 +83,7 @@ a {
 	width: 20px;
 	left: 2px;
 	bottom: 2px;
-	background-color: #ffff;
+	background-color: white;
 	border-radius: 50%;
 	transition: 0.4s;
 }
