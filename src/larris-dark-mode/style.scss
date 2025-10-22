@@ -2,39 +2,6 @@
  * Shared styles for front-end and editor
  */
 
-/* =============================
-   COLOR VARIABLES
-============================= */
-:root {
-	--dark: #142850;    /* text / border dark color */
-	--light: #dae1e7;   /* background light color */
-}
-
-html[data-theme="dark"] {
-	--dark: #dae1e7;    /* text / border light color */
-	--light: #142850;   /* background dark color */
-}
-
-/* =============================
-   GLOBAL ELEMENTS
-============================= */
-body,
-a,
-.post-container,
-.header-separator {
-	transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-}
-
-
-a {
-	color: var(--dark);
-	text-decoration: none;
-}
-
-.post-container,
-.header-separator {
-	border: 1px solid var(--dark);
-}
 
 /* =============================
    THEME SWITCHER TOGGLE
