@@ -3,7 +3,7 @@ name: Deploy Larris Dark Mode Staging
 on:
   push:
     branches:
-      - Staging
+      - staging
 
 jobs:
   deploy:
