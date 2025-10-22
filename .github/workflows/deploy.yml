@@ -22,7 +22,7 @@ jobs:
         remote-user: ${{ secrets.REMOTE_USER }}
         private-ssh-key: ${{ secrets.SSH_KEY }}
         ssh-port: ${{ secrets.SSH_PORT }}
-        destination-path: ${{ secrets.STAGING_SITE_PATH }}
+        destination-path: ${{ secrets.LIVE_SITE_PATH }}
         
         
         
