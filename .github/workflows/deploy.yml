@@ -1,10 +1,9 @@
-name: Lint and Deploy
+name: Deploy Larris Dark Mode
 
 on:
   push:
     branches:
       - main
-      - 'feature/**'
   pull_request:
 
 jobs:
