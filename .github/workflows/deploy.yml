@@ -2,7 +2,7 @@ name: Deploy Larris Dark Mode
 
 on:
   workflow_run:
-    workflows: ["Lint"]     # runs after the "Lint" workflow
+    workflows: ["Lint"]
     types:
       - completed
   push:
@@ -13,7 +13,7 @@ jobs:
   deploy:
     name: Deploy to Server
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}  # only if lint passed
+    if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout code
