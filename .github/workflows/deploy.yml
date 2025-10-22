@@ -17,8 +17,8 @@ jobs:
       - name: 📂 Sync Files to Staging
         uses: SamKirkland/web-deploy@v1
         with:
-          target-server: ${{ secrets.STAGING_SERVER }}
-          remote-user: ${{ secrets.STAGING_USER }}
-          private-ssh-key: ${{ secrets.STAGING_SSH_KEY }}
-          ssh-port: ${{ secrets.STAGING_SSH_PORT }}
+          target-server: ${{ secrets.TARGET_SERVER }}
+          remote-user: ${{ secrets.REMOTE_USER }}
+          private-ssh-key: ${{ secrets.SSH_KEY }}
+          ssh-port: ${{ secrets.SSH_PORT }}
           destination-path: ${{ secrets.STAGING_SITE_PATH }}
