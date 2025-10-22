@@ -142,14 +142,16 @@ function larris_dark_mode_inline_styles() {
 			transition: background-color 0.3s, color 0.3s;
 		}
 
-		a {
+		a,
+		.wp-block-navigation-item.wp-block-navigation-link {
 			color: var(--light-link);
 			text-decoration: none;
 			transition: color 0.3s;
 		}
 
 		a:hover,
-		a:focus {
+		a:focus,
+		.wp-block-navigation-item.wp-block-navigation-link:hover {
 			color: var(--light-hover);
 		}
 
