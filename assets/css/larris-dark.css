@@ -1,0 +1,43 @@
+body {
+	background-color: var(--light-bg);
+	color: var(--light-text);
+}
+
+a {
+	color: var(--light-link);
+}
+
+a:hover {
+	color: var(--light-link-hover);
+}
+
+.wp-block-post-title a,
+.wp-block-site-title a {
+	color: var(--light-text);
+}
+
+.wp-block-post-title a:hover,
+.wp-block-site-title a:hover {
+	color: var(--light-text);
+}
+
+.taxonomy-category a,
+time {
+	color: var(--light-metadata)
+}
+
+.taxonomy-category a:hover {
+	color: var(--light-metadata-hover)
+}
+
+
+.wp-block-button__link.wp-element-button {
+	background-color: var(--light-btn-bg);
+	color: var(--light-btn-text);
+	transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+.wp-block-button__link.wp-element-button:hover {
+	background-color: var(--light-btn-bg-hover);
+	color: var(--light-btn-text-hover);
+}
