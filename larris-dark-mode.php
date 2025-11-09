@@ -14,183 +14,146 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
+	exit;
 }
+
 /**
- * Registers the block using a `blocks-manifest.php` file, which improves the performance of block type registration.
- * Behind the scenes, it also registers all assets so they can be enqueued
- * through the block editor in the corresponding context.
- *
- * @see https://make.wordpress.org/core/2025/03/13/more-efficient-block-type-registration-in-6-8/
- * @see https://make.wordpress.org/core/2024/10/17/new-block-type-registration-apis-to-improve-performance-in-wordpress-6-7/
+ * Registers block(s) for this plugin.
  */
 function create_block_larris_dark_block_init() {
-	/**
-	 * Registers the block(s) metadata from the `blocks-manifest.php` and registers the block type(s)
-	 * based on the registered block metadata.
-	 * Added in WordPress 6.8 to simplify the block metadata registration process added in WordPress 6.7.
-	 *
-	 * @see https://make.wordpress.org/core/2025/03/13/more-efficient-block-type-registration-in-6-8/
-	 */
 	if ( function_exists( 'wp_register_block_types_from_metadata_collection' ) ) {
 		wp_register_block_types_from_metadata_collection( __DIR__ . '/build', __DIR__ . '/build/blocks-manifest.php' );
 		return;
 	}
 
-	/**
-	 * Registers the block(s) metadata from the `blocks-manifest.php` file.
-	 * Added to WordPress 6.7 to improve the performance of block type registration.
-	 *
-	 * @see https://make.wordpress.org/core/2024/10/17/new-block-type-registration-apis-to-improve-performance-in-wordpress-6-7/
-	 */
 	if ( function_exists( 'wp_register_block_metadata_collection' ) ) {
 		wp_register_block_metadata_collection( __DIR__ . '/build', __DIR__ . '/build/blocks-manifest.php' );
 	}
-	/**
-	 * Registers the block type(s) in the `blocks-manifest.php` file.
-	 *
-	 * @see https://developer.wordpress.org/reference/functions/register_block_type/
-	 */
+
 	$manifest_data = require __DIR__ . '/build/blocks-manifest.php';
 	foreach ( array_keys( $manifest_data ) as $block_type ) {
 		register_block_type( __DIR__ . "/build/{$block_type}" );
 	}
 }
+add_action( 'init', 'create_block_larris_dark_block_init' );
 
 // Include admin settings page.
 if ( is_admin() ) {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/admin-settings.php';
 }
 
-
-add_action( 'init', 'create_block_larris_dark_block_init' );
-
 /**
- * Add inline script early to set the saved theme before CSS loads.
+ * Add inline script early — sets theme and dynamically injects user-defined classes.
  */
 function larris_dark_mode_inline_theme_script() {
+	$class_map = get_option( 'larris_dark_mode_class_map', array() );
+	$json_map  = wp_json_encode( $class_map );
 	?>
 	<script>
-		(function() {
-			try {
-				const saved = localStorage.getItem('theme');
-				const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-				const theme = saved || (prefersDark ? 'dark' : 'light');
-				if (theme === 'dark') {
-					document.documentElement.setAttribute('data-theme', 'dark');
-				}
-			} catch (e) {}
-		})();
+	(function() {
+		try {
+			// 🌗 1. Apply saved theme before CSS paint.
+			const saved = localStorage.getItem('theme');
+			const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+			const theme = saved || (prefersDark ? 'dark' : 'light');
+			if (theme === 'dark') {
+				document.documentElement.setAttribute('data-theme', 'dark');
+			}
+
+			// 🌈 2. Dynamically inject user-specified classes before CSS paint.
+			const classMap = <?php echo $json_map ? esc_js( $json_map ) : '{}'; ?>;
+			if (Object.keys(classMap).length) {
+				const applyClasses = () => {
+					for (const [selector, injectClass] of Object.entries(classMap)) {
+						document.querySelectorAll(selector).forEach(el => {
+							if (!el.classList.contains(injectClass)) {
+								el.classList.add(injectClass);
+							}
+						});
+					}
+				};
+				// Run immediately.
+				applyClasses();
+				// Observe for dynamic DOM changes (like Gutenberg or AJAX).
+				const observer = new MutationObserver(applyClasses);
+				observer.observe(document.documentElement, { childList: true, subtree: true });
+			}
+		} catch (e) {
+			console.warn('Larris Dark Mode: Script error', e);
+		}
+	})();
 	</script>
 	<?php
 }
 add_action( 'wp_head', 'larris_dark_mode_inline_theme_script', 1 );
 
-
-
 /**
- * Output custom colors as CSS variables for both themes.
+ * Output custom colors as CSS variables and enqueue the external stylesheet.
  */
-function larris_dark_mode_inline_styles() {
-	// Light theme colors.
-	$light_bg            = get_option( 'larris_dark_mode_light_bg', '#dae1e7' );
-	$light_txt           = get_option( 'larris_dark_mode_light_text', '#142850' );
-	$light_link          = get_option( 'larris_dark_mode_light_link', '#1e73be' );
-	$light_hover         = get_option( 'larris_dark_mode_light_hover', '#125688' );
-	$light_btn_bg        = get_option( 'larris_dark_mode_light_btn_bg', '#A6B1E1' );
-	$light_btn_txt       = get_option( 'larris_dark_mode_light_btn_text', '#ffffff' );
-	$light_btn_bg_hover  = get_option( 'larris_dark_mode_light_btn_bg_hover', '#8c95d8' );
-	$light_btn_txt_hover = get_option( 'larris_dark_mode_light_btn_text_hover', '#ffffff' );
+function larris_dark_mode_enqueue_styles() {
 
-	// Dark theme colors.
-	$dark_bg            = get_option( 'larris_dark_mode_dark_bg', '#142850' );
-	$dark_txt           = get_option( 'larris_dark_mode_dark_text', '#dae1e7' );
-	$dark_link          = get_option( 'larris_dark_mode_dark_link', '#4da8da' );
-	$dark_hover         = get_option( 'larris_dark_mode_dark_hover', '#90e0ef' );
-	$dark_btn_bg        = get_option( 'larris_dark_mode_dark_btn_bg', '#424874' );
-	$dark_btn_txt       = get_option( 'larris_dark_mode_dark_btn_text', '#F4EEFF' );
-	$dark_btn_bg_hover  = get_option( 'larris_dark_mode_dark_btn_bg_hover', '#5c5f8e' );
-	$dark_btn_txt_hover = get_option( 'larris_dark_mode_dark_btn_text_hover', '#ffffff' );
+	// 1️⃣ Enqueue the external stylesheet (for layout and style rules).
+	$css_file = plugin_dir_path( __FILE__ ) . 'assets/css/larris-dark.css';
+	wp_enqueue_style(
+		'larris-dark-mode-base',
+		plugin_dir_url( __FILE__ ) . 'assets/css/larris-dark.css',
+		array(),
+		filemtime( $css_file )
+	);
 
-	// Dynamic CSS output.
+	// 2️⃣ Fetch the dynamic color values from the plugin options.
+	$light_bg             = get_option( 'larris_dark_mode_light_bg', '#dae1e7' );
+	$light_txt            = get_option( 'larris_dark_mode_light_text', '#142850' );
+	$light_link           = get_option( 'larris_dark_mode_light_link', '#142850' );
+	$light_link_hover     = get_option( 'larris_dark_mode_light_link_hover', '#112233' );
+	$light_btn_bg         = get_option( 'larris_dark_mode_light_btn_bg', '#112233' );
+	$light_btn_bg_hover   = get_option( 'larris_dark_mode_light_btn_bg_hover', '#112233' );
+	$light_btn_text       = get_option( 'larris_dark_mode_light_btn_text', '#112233' );
+	$light_btn_text_hover = get_option( 'larris_dark_mode_light_btn_text_hover', '#112233' );
+	$light_metadata       = get_option( 'larris_dark_mode_light_metadata', '#112233' );
+	$light_metadata_hover = get_option( 'larris_dark_mode_light_metadata_hover', '#112233' );
+
+	$dark_bg             = get_option( 'larris_dark_mode_dark_bg', '#142850' );
+	$dark_txt            = get_option( 'larris_dark_mode_dark_text', '#dae1e7' );
+	$dark_link           = get_option( 'larris_dark_mode_dark_link', '#ffffff' );
+	$dark_link_hover     = get_option( 'larris_dark_mode_dark_link_hover', '#bbbbbb' );
+	$dark_btn_bg         = get_option( 'larris_dark_mode_dark_btn_bg', '#112233' );
+	$dark_btn_bg_hover   = get_option( 'larris_dark_mode_dark_btn_bg_hover', '#112233' );
+	$dark_btn_text       = get_option( 'larris_dark_mode_dark_btn_text', '#112233' );
+	$dark_btn_text_hover = get_option( 'larris_dark_mode_dark_btn_text_hover', '#112233' );
+	$dark_metadata       = get_option( 'larris_dark_mode_dark_metadata', '#112233' );
+	$dark_metadata_hover = get_option( 'larris_dark_mode_dark_metadata_hover', '#112233' );
+
+	// 3️⃣ Define the CSS variables (these will be available globally).
 	$custom_css = "
 		:root {
 			--light-bg: {$light_bg};
 			--light-text: {$light_txt};
 			--light-link: {$light_link};
-			--light-hover: {$light_hover};
-			--btn-bg: {$light_btn_bg};
-			--btn-text: {$light_btn_txt};
-			--btn-bg-hover: {$light_btn_bg_hover };
-			--btn-text-hover: {$light_btn_txt_hover};
+			--light-link-hover: {$light_link_hover};
+			--light-btn-bg: {$light_btn_bg};
+			--light-btn-bg-hover: {$light_btn_bg_hover};
+			--light-btn-text: {$light_btn_text};
+			--light-btn-text-hover: {$light_btn_text_hover};
+			--light-metadata: {$light_metadata};
+			--light-metadata-hover: {$light_metadata_hover};
 		}
 
 		html[data-theme='dark'] {
 			--light-bg: {$dark_bg};
 			--light-text: {$dark_txt};
 			--light-link: {$dark_link};
-			--light-hover: {$dark_hover};
-			--btn-bg: {$dark_btn_bg};
-			--btn-text: {$dark_btn_txt};
-			--btn-bg-hover: {$dark_btn_bg_hover};
-			--btn-text-hover: {$dark_btn_txt_hover};
+			--light-link-hover: {$dark_link_hover};
+			--light-btn-bg: {$dark_btn_bg};
+			--light-btn-bg-hover: {$dark_btn_bg_hover};
+			--light-btn-text: {$dark_btn_text};
+			--light-btn-text-hover: {$dark_btn_text_hover};
+			--light-metadata: {$dark_metadata};
+			--light-metadata-hover: {$dark_metadata_hover};
 		}
-
-		body {
-			background-color: var(--light-bg);
-			color: var(--light-text);
-			transition: background-color 0.3s, color 0.3s;
-		}
-
-		a,
-		.wp-block-navigation-item.wp-block-navigation-link {
-			color: var(--light-link);
-			text-decoration: none;
-			transition: color 0.3s;
-		}
-
-		a:hover,
-		a:focus,
-		.wp-block-navigation-item.wp-block-navigation-link:hover {
-			color: var(--light-hover);
-		}
-
-        .wp-block-button__link.has-custom-font-size.wp-element-button {
-	        display: inline-block;
-	        background-color: var(--btn-bg);
-	        color: var(--btn-text);
-	        text-decoration: none;
-	        transition:
-		        background-color 0.35s ease-in-out,
-		        color 0.35s ease-in-out,
-		        box-shadow 0.35s ease-in-out;
-	        will-change: background-color, color, box-shadow;
-        }
-
-        .wp-block-button__link.wp-element-button:hover,
-        .wp-block-button__link.has-custom-font-size.wp-element-button:hover {
-	        background-color: var(--btn-bg-hover);
-	        color: var(--btn-text-hover);
-	        box-shadow: 0 0 12px rgba(0, 0, 0, 0.15);
-        }
-
-
 	";
 
-	// Cache-busting version.
-	$version = defined( 'LARRIS_DARK_MODE_VERSION' ) ? LARRIS_DARK_MODE_VERSION : filemtime( __FILE__ );
-
-	wp_register_style( 'larris-dark-mode-dynamic', false, array(), $version );
-	wp_enqueue_style( 'larris-dark-mode-dynamic' );
-	wp_add_inline_style( 'larris-dark-mode-dynamic', $custom_css );
+	// 4️⃣ Inject the CSS variables inline (so they’re available before your CSS uses them).
+	wp_add_inline_style( 'larris-dark-mode-base', $custom_css );
 }
-add_action( 'wp_enqueue_scripts', 'larris_dark_mode_inline_styles' );
-
-
-
-
-
-
-
-
-
+add_action( 'wp_enqueue_scripts', 'larris_dark_mode_enqueue_styles' );
