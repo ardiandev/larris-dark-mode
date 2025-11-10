@@ -1,16 +1,17 @@
 
-body {
-	background-color: var(--light-bg);
-	color: var(--light-text);
-}
 
-a {
+
+a{
 	color: var(--light-link);
 }
 
 a:hover {
 	color: var(--light-link-hover);
 }
+
+ .page-numbers  {
+	color: var(--light-text) !important;
+ }
 
 .wp-block-post-title a,
 .wp-block-site-title a {
