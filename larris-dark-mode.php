@@ -5,7 +5,7 @@
  * Version:           0.1.0
  * Requires at least: 6.7
  * Requires PHP:      7.4
- * Author:            The WordPress Contributors
+ * Author:            Ardian Pradana
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       larris-dark
@@ -150,6 +150,11 @@ function larris_dark_mode_enqueue_styles() {
 			--light-btn-text-hover: {$dark_btn_text_hover};
 			--light-metadata: {$dark_metadata};
 			--light-metadata-hover: {$dark_metadata_hover};
+		}
+
+		body {
+			background-color: var(--light-bg);
+			color: var(--light-text);
 		}
 	";
 
