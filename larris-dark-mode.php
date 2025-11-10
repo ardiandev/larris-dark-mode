@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name:       Larris Dark Mode
- * Description:       Example block scaffolded with Create Block tool.
- * Version:           0.1.0
+ * Description:       Example block scaffolded with Create Block tool (with flash-free dark mode).
+ * Version:           0.2.0
  * Requires at least: 6.7
  * Requires PHP:      7.4
  * Author:            Ardian Pradana
@@ -43,24 +43,59 @@ if ( is_admin() ) {
 }
 
 /**
- * Add inline script early — sets theme and dynamically injects user-defined classes.
+ * 0️⃣ Super-early inline script + style — prevents white flash.
+ */
+add_action(
+	'wp_head',
+	function () {
+		?>
+		<style id="larris-dark-prepaint">
+			html {
+				background-color: <?php echo esc_attr( get_option( 'larris_dark_mode_light_bg', '#dae1e7' ) ); ?>;
+				color-scheme: light dark;
+			}
+			html[data-theme='dark'] {
+				background-color: <?php echo esc_attr( get_option( 'larris_dark_mode_dark_bg', '#142850' ) ); ?>;
+			}
+		</style>
+		<script>
+			(function() {
+				try {
+					const saved = localStorage.getItem('theme');
+					const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+					const theme = saved || (prefersDark ? 'dark' : 'light');
+					document.documentElement.dataset.theme = theme;
+					document.documentElement.style.backgroundColor = (theme === 'dark')
+						? '<?php echo esc_js( get_option( 'larris_dark_mode_dark_bg', '#142850' ) ); ?>'
+						: '<?php echo esc_js( get_option( 'larris_dark_mode_light_bg', '#dae1e7' ) ); ?>';
+				} catch (e) {
+					console.warn('Larris Dark Mode: Prepaint error', e);
+				}
+			})();
+		</script>
+		<?php
+	},
+	0
+);
+
+
+/**
+ * Add inline script — applies theme + custom class map (for dynamic elements).
  */
 function larris_dark_mode_inline_theme_script() {
 	$class_map = get_option( 'larris_dark_mode_class_map', array() );
 	$json_map  = wp_json_encode( $class_map );
 	?>
-	<script>
+	<script id="larris-dark-runtime">
 	(function() {
 		try {
-			// 🌗 1. Apply saved theme before CSS paint.
+			// Apply saved theme again after DOM ready (ensures consistency)
 			const saved = localStorage.getItem('theme');
 			const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 			const theme = saved || (prefersDark ? 'dark' : 'light');
-			if (theme === 'dark') {
-				document.documentElement.setAttribute('data-theme', 'dark');
-			}
+			document.documentElement.setAttribute('data-theme', theme);
 
-			// 🌈 2. Dynamically inject user-specified classes before CSS paint.
+			// Apply user-defined classes dynamically
 			const classMap = <?php echo $json_map ? esc_js( $json_map ) : '{}'; ?>;
 			if (Object.keys(classMap).length) {
 				const applyClasses = () => {
@@ -72,9 +107,7 @@ function larris_dark_mode_inline_theme_script() {
 						});
 					}
 				};
-				// Run immediately.
 				applyClasses();
-				// Observe for dynamic DOM changes (like Gutenberg or AJAX).
 				const observer = new MutationObserver(applyClasses);
 				observer.observe(document.documentElement, { childList: true, subtree: true });
 			}
@@ -92,7 +125,6 @@ add_action( 'wp_head', 'larris_dark_mode_inline_theme_script', 1 );
  */
 function larris_dark_mode_enqueue_styles() {
 
-	// 1️⃣ Enqueue the external stylesheet (for layout and style rules).
 	$css_file = plugin_dir_path( __FILE__ ) . 'assets/css/larris-dark.css';
 	wp_enqueue_style(
 		'larris-dark-mode-base',
@@ -101,7 +133,7 @@ function larris_dark_mode_enqueue_styles() {
 		filemtime( $css_file )
 	);
 
-	// 2️⃣ Fetch the dynamic color values from the plugin options.
+	// Get light/dark mode color options.
 	$light_bg             = get_option( 'larris_dark_mode_light_bg', '#dae1e7' );
 	$light_txt            = get_option( 'larris_dark_mode_light_text', '#142850' );
 	$light_link           = get_option( 'larris_dark_mode_light_link', '#142850' );
@@ -124,7 +156,6 @@ function larris_dark_mode_enqueue_styles() {
 	$dark_metadata       = get_option( 'larris_dark_mode_dark_metadata', '#112233' );
 	$dark_metadata_hover = get_option( 'larris_dark_mode_dark_metadata_hover', '#112233' );
 
-	// 3️⃣ Define the CSS variables (these will be available globally).
 	$custom_css = "
 		:root {
 			--light-bg: {$light_bg};
@@ -158,7 +189,6 @@ function larris_dark_mode_enqueue_styles() {
 		}
 	";
 
-	// 4️⃣ Inject the CSS variables inline (so they’re available before your CSS uses them).
 	wp_add_inline_style( 'larris-dark-mode-base', $custom_css );
 }
 add_action( 'wp_enqueue_scripts', 'larris_dark_mode_enqueue_styles' );
